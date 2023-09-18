@@ -1,14 +1,16 @@
 package com.learn.restaurantreview.ui
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.learn.restaurantreview.R
 import com.learn.restaurantreview.data.response.CustomerReviewsItem
+import com.learn.restaurantreview.data.response.PostReviewResponse
 import com.learn.restaurantreview.data.response.Restaurant
 import com.learn.restaurantreview.data.response.RestaurantResponse
 import com.learn.restaurantreview.data.retrofit.ApiConfig
@@ -41,6 +43,41 @@ class MainActivity : AppCompatActivity() {
 
         findRestaurant()
 
+        //ini menjalankan sebuh fungsi btn yang telat di buat yang berguna untuk menbgirimkan data ke database/API
+        binding.btnSend.setOnClickListener { view ->
+            postReview(binding.edReview.text.toString())
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
+
+    }
+
+    //fun postReview adlah fungsi untuk tombol submit yang dapat berguna untuk mengirim data ke database
+    private fun postReview(review: String) {
+        showLoading(true)
+        val client = ApiConfig.getApiService().postReview(RESTAURANT_ID, "Dicoding", review)
+        //fungsi enqueue untuk menjalankan request secara asynchronous di background.
+        client.enqueue(object : Callback<PostReviewResponse> {
+            override fun onResponse(
+                call: Call<PostReviewResponse>,
+                response: Response<PostReviewResponse>
+            ) {
+                showLoading(false)
+                val responseBody = response.body()
+                //maka untuk mendapatkan data ketika berhasil, kita mengeceknya melalui response.isSuccessful()
+                //apakah server mengembalikan kode 200 (OK) atau tidak. Untuk datanya sendiri dapat diambil di response.body().
+                if (response.isSuccessful && responseBody != null) {
+                    setReviewData(responseBody.customerReviews)
+                } else {
+                    Log.e(TAG, "onFailure: ${response.message()}")
+                }
+            }
+            override fun onFailure(call: Call<PostReviewResponse>, t: Throwable) {
+                showLoading(false)
+                Log.e(TAG, "onFailure: ${t.message}")
+            }
+            //hasilnya terdapat dua callback, yakni onResponse ketika ada respon, dan onFailure ketika gagal
+        })
     }
 
     private fun findRestaurant() {

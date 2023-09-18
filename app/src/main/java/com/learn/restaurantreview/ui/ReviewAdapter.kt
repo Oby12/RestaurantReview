@@ -27,10 +27,15 @@ class ReviewAdapter : ListAdapter<CustomerReviewsItem, ReviewAdapter.MyViewHolde
         }
     }
     companion object {
+        //Hal tersebut bisa terimplementasikan karena adanya DiffUtil yang berguna untuk memeriksa apakah suatu data masih sama atau tidak.
         val DIFF_CALLBACK = object : DiffUtil.ItemCallback<CustomerReviewsItem>() {
+            //areItemsTheSame() digunakan untuk memeriksa id atau key yang unik. Biasanya digunakan untuk mengetahui
+            // apakah ada perubahan posisi dan
             override fun areItemsTheSame(oldItem: CustomerReviewsItem, newItem: CustomerReviewsItem): Boolean {
                 return oldItem == newItem
             }
+            //Sedangkan areContentsTheSame() digunakan untuk memeriksa apakah konten dari dua item sama atau tidak. Fungsi ini digunakan untuk
+            //mengetahui ada pembaruan konten pada suatu item.
             override fun areContentsTheSame(oldItem: CustomerReviewsItem, newItem: CustomerReviewsItem): Boolean {
                 return oldItem == newItem
             }
