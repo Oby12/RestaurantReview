@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -34,18 +35,34 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        supportActionBar?.hide()
+
+        val mainViewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory()).get(MainViewModel::class.java)
+        mainViewModel.restaurant.observe(this) { restaurant ->
+            setRestaurantData(restaurant)
+        }
+
         val layoutManager = LinearLayoutManager(this)
         binding.rvReview.layoutManager = layoutManager
         val itemDecoration = DividerItemDecoration(this, layoutManager.orientation)
         binding.rvReview.addItemDecoration(itemDecoration)
 
-        supportActionBar?.hide()
 
-        findRestaurant()
+        mainViewModel.listReview.observe(this) { consumerReviews ->
+            setReviewData(consumerReviews)
+        }
+
+
+        mainViewModel.isLoading.observe(this) {
+            showLoading(it)
+        }
+
+
+        //findRestaurant()
 
         //ini menjalankan sebuh fungsi btn yang telat di buat yang berguna untuk menbgirimkan data ke database/API
         binding.btnSend.setOnClickListener { view ->
-            postReview(binding.edReview.text.toString())
+            mainViewModel.postReview(binding.edReview.text.toString())
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
@@ -53,7 +70,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     //fun postReview adlah fungsi untuk tombol submit yang dapat berguna untuk mengirim data ke database
-    private fun postReview(review: String) {
+    /*private fun postReview(review: String) {
         showLoading(true)
         val client = ApiConfig.getApiService().postReview(RESTAURANT_ID, "Dicoding", review)
         //fungsi enqueue untuk menjalankan request secara asynchronous di background.
@@ -78,9 +95,9 @@ class MainActivity : AppCompatActivity() {
             }
             //hasilnya terdapat dua callback, yakni onResponse ketika ada respon, dan onFailure ketika gagal
         })
-    }
+    }*/
 
-    private fun findRestaurant() {
+    /*private fun findRestaurant() {
         showLoading(true)
         val client = ApiConfig.getApiService().getRestaurantOby(RESTAURANT_ID)
         client.enqueue(object : Callback<RestaurantResponse> {
@@ -105,7 +122,7 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "onFailure: ${t.message}")
             }
         })
-    }
+    }*/
 
     private fun setRestaurantData(restaurant: Restaurant) {
         binding.tvTitle.text = restaurant.name
@@ -123,10 +140,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showLoading(isLoading: Boolean) {
-        if (isLoading) {
+        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+    }
+        /*if (isLoading) {
             binding.progressBar.visibility = View.VISIBLE
         } else {
             binding.progressBar.visibility = View.GONE
         }
-    }
+    }*/
 }
