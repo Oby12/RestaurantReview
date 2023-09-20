@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
 import com.learn.restaurantreview.data.response.CustomerReviewsItem
 import com.learn.restaurantreview.data.response.PostReviewResponse
 import com.learn.restaurantreview.data.response.Restaurant
@@ -48,15 +49,25 @@ class MainActivity : AppCompatActivity() {
         binding.rvReview.addItemDecoration(itemDecoration)
 
 
+        //Perlu Anda ketahui bahwa customerReviews adalah custom variabel untuk hasil LiveData yang ada di ViewModel
+        //Jika Anda tidak menuliskan customerReviews-> maka variabel default-nya adalah it.
         mainViewModel.listReview.observe(this) { consumerReviews ->
             setReviewData(consumerReviews)
         }
+        //dokumnetasi unutk syntax di atas
+        /*customerReviews akan selalu diperbarui secara realtime sesuai dengan perubahan yang ada di kelas ViewModel.
+        Contohnya yaitu saat Anda menambahkan data review baru, alih alih memanggil fungsi findRestaurant lagi,
+        Anda cukup mengobservasi LiveData tersebut untuk selalu mendapatkan data terbaru. Lebih lanjut, proses ini dilakukan
+        secara asynchronous sehingga tidak akan mengganggu interaksi UI Anda*/
 
-
+        
         mainViewModel.isLoading.observe(this) {
             showLoading(it)
         }
 
+        mainViewModel.snackbarText.observe(this){
+            Snackbar.make(window.decorView.rootView, it, Snackbar.LENGTH_SHORT).show()
+        }
 
         //findRestaurant()
 

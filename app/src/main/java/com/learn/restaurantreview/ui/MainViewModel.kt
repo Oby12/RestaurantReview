@@ -19,11 +19,21 @@ class MainViewModel : ViewModel() {
     private val _restaurant = MutableLiveData<Restaurant>()
     val restaurant: LiveData<Restaurant> = _restaurant
 
+    //documemntation
+    /*Inilah yang disebut dengan encapsulation pada LiveData, yaitu dengan membuat data yang bertipe MutableLiveData menjadi private (_listReview)
+    dan yang bertipe LiveData menjadi public (listReview). Cara ini disebut dengan backing property. Dengan begitu Anda dapat mencegah variabel yang
+    bertipe MutableLiveData diubah dari luar class. Karena memang seharusnya hanya ViewModel-lah yang dapat mengubah data.*/
     private val _listReview = MutableLiveData<List<CustomerReviewsItem>>()
     val listReview: LiveData<List<CustomerReviewsItem>> = _listReview
 
+    //namun bedanya MutableLiveData bisa kita ubah value-nya
     private val _isLoading = MutableLiveData<Boolean>()
+    //sedangkan LiveData bersifat read-only (tidak dapat diubah).
     val isLoading: LiveData<Boolean> = _isLoading
+
+    //variabel untuk menyimpan text yang akan ditampilkan Snackbar
+    private val _snackbartext = MutableLiveData<String>()
+    val snackbarText : LiveData<String> = _snackbartext
 
     companion object{
         private const val TAG = "MainViewModel"
@@ -35,6 +45,7 @@ class MainViewModel : ViewModel() {
     }
 
     private fun findRestaurant() {
+        //Yang dimaksud mengubah value-nya adalah pada bagian ini
         _isLoading.value = true
         val client = ApiConfig.getApiService().getRestaurantOby(RESTAURANT_ID)
         client.enqueue(object : Callback<RestaurantResponse> {
@@ -60,12 +71,14 @@ class MainViewModel : ViewModel() {
 
     fun postReview(review: String) {
         _isLoading.value = true
+        //Intinya adalah setValue() bekerja di main thread dan postValue() bekerja di background thread.
         val client = ApiConfig.getApiService().postReview(RESTAURANT_ID, "Dicoding", review)
         client.enqueue(object : Callback<PostReviewResponse> {
             override fun onResponse(call: Call<PostReviewResponse>, response: Response<PostReviewResponse>) {
                 _isLoading.value = false
                 if (response.isSuccessful) {
                     _listReview.value = response.body()?.customerReviews
+                    _snackbartext.value = response.body()?.message
                 } else {
                     Log.e(TAG, "onFailure: ${response.message()}")
                 }
