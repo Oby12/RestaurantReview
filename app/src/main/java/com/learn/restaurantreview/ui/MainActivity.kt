@@ -65,10 +65,15 @@ class MainActivity : AppCompatActivity() {
             showLoading(it)
         }
 
-        mainViewModel.snackbarText.observe(this){
-            Snackbar.make(window.decorView.rootView, it, Snackbar.LENGTH_SHORT).show()
+        mainViewModel.snackbarText.observe(this) {
+            it.getContentIfNotHandled()?.let { snackBarText ->
+                Snackbar.make(
+                    window.decorView.rootView,
+                    snackBarText,
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
         }
-
         //findRestaurant()
 
         //ini menjalankan sebuh fungsi btn yang telat di buat yang berguna untuk menbgirimkan data ke database/API

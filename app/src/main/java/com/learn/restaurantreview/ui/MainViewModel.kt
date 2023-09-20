@@ -9,6 +9,7 @@ import com.learn.restaurantreview.data.response.PostReviewResponse
 import com.learn.restaurantreview.data.response.Restaurant
 import com.learn.restaurantreview.data.response.RestaurantResponse
 import com.learn.restaurantreview.data.retrofit.ApiConfig
+import com.learn.restaurantreview.utils.Event
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -32,8 +33,8 @@ class MainViewModel : ViewModel() {
     val isLoading: LiveData<Boolean> = _isLoading
 
     //variabel untuk menyimpan text yang akan ditampilkan Snackbar
-    private val _snackbartext = MutableLiveData<String>()
-    val snackbarText : LiveData<String> = _snackbartext
+    private val _snackbartext = MutableLiveData<Event<String>>()
+    val snackbarText : LiveData<Event<String>> = _snackbartext
 
     companion object{
         private const val TAG = "MainViewModel"
@@ -78,7 +79,9 @@ class MainViewModel : ViewModel() {
                 _isLoading.value = false
                 if (response.isSuccessful) {
                     _listReview.value = response.body()?.customerReviews
-                    _snackbartext.value = response.body()?.message
+                    _snackbartext.value = Event(response.body()?.message.toString())  //<- ini adalah pengggunaan dengan event
+                    /*_snackbartext.value = response.body()?.message*/
+
                 } else {
                     Log.e(TAG, "onFailure: ${response.message()}")
                 }
